@@ -52,16 +52,14 @@ def receive_callback():
     token_result: dict = response.json()
     global token
     token = token_result["token"]
-    
+
     from db.db_actions import add_user
-    user = add_user(
-        email="",
-        password="",
-        ucl_api_token=token
-    )
-    
-    # Return user_id to client so it can use it in /scrape
-    return jsonify({"user_id": str(user.id)})
+    add_user(email="", password="", ucl_api_token=token, session=None)
+    # Generate and return a UUID for the created user
+    if user:
+        return jsonify({"user_id": str(user.id)})
+    else:
+        return jsonify({"status": "error", "error": "Failed to create user"}), 500
 
 
 @app.route("/scrape", methods=["POST"])
