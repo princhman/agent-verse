@@ -9,24 +9,24 @@
 
 	const suggestedActions = [
 		{
-			title: 'What are the advantages',
-			label: 'of using SvelteKit?',
-			action: 'What are the advantages of using SvelteKit?'
+			title: 'Any study spaces left at the library',
+			label: `after my OOP lecture tomorrow`,
+			action: `Any study spaces left at the library after my OOP lecture tomorrow`
 		},
 		{
-			title: 'Write code to',
-			label: `demonstrate djikstra's algorithm`,
-			action: `Write code to demonstrate djikstra's algorithm`
+			title: 'What is the research interest',
+			label: `of the new prof for next week?`,
+			action: `What is the research interest of the new prof for next week?`
 		},
 		{
-			title: 'Help me write an essay',
-			label: `about silicon valley`,
-			action: `Help me write an essay about silicon valley`
+			title: 'Help me book study spaces for 3',
+			label: `after every C++ tutorial`,
+			action: `Help me book study spaces after every C++ tutorial`
 		},
 		{
-			title: 'What is the weather like',
-			label: 'in San Francisco?',
-			action: 'What is the weather like in San Francisco?'
+			title: 'What student societies would',
+			label: 'work with my schedule and career goals',
+			action: 'What student societies would work with my schedule and career goals'
 		}
 	];
 </script>
