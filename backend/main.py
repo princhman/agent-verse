@@ -78,17 +78,8 @@ def receive_callback():
     }
     response: Response = requests.get("https://uclapi.com/oauth/token", params=params)
     token_result: dict = response.json()
-    global token
     token = token_result["token"]
-
-    from db.db_actions import add_user
-
-    add_user(email="", password="", ucl_api_token=token, session=None)
-    # Generate and return a UUID for the created user
-    if user:
-        return jsonify({"user_id": str(user.id)})
-    else:
-        return jsonify({"status": "error", "error": "Failed to create user"}), 500
+    return jsonify({"token": token})
 
 
 @app.route("/scrape", methods=["POST"])
