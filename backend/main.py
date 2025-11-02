@@ -41,9 +41,6 @@ def receive_callback():
     result = request.args.get("result", "")
     code = request.args.get("code", "")
     state = request.args.get("state", "")
-    # do something with these parameters
-    print(result)
-    print("code: " + code)
 
     # e.g. request an auth token from /oauth/tokem
     params: dict = {
@@ -55,22 +52,14 @@ def receive_callback():
     token_result: dict = response.json()
     global token
     token = token_result["token"]
-    print("token: " + token)
-    return redirect("/timetable_results")
 
-
-@app.route("/room_results")
-def room_results():
-    data = get_free_rooms(start_time, end_time, token)
-    print(data)
-    return data
-
-
-@app.route("/timetable_results")
-def timetable_results():
-    data = get_personal_timetable(token)
-    print(data)
-    return data
+    from db.db_actions import add_user
+    add_user(email="", password="", ucl_api_token=token, session=None)
+    # Generate and return a UUID for the created user
+    if user:
+        return jsonify({"user_id": str(user.id)})
+    else:
+        return jsonify({"status": "error", "error": "Failed to create user"}), 500
 
 
 @app.route("/scrape", methods=["POST"])
