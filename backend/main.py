@@ -12,6 +12,7 @@ from requests import Response
 import os
 from dotenv import load_dotenv
 import uuid
+import subprocess
 
 load_dotenv()
 
@@ -21,11 +22,38 @@ client_secret = os.getenv("CLIENT_SECRET")
 client_id = os.getenv("CLIENT_ID")
 token = ""
 
+
+def ensure_playwright_browsers():
+    """Ensure Playwright browsers are installed at runtime."""
+    try:
+        result = subprocess.run(
+            ["python", "-m", "playwright", "install", "chromium"],
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+        if result.returncode != 0:
+            print(
+                f"Warning: Playwright browser installation returned non-zero code: {result.returncode}"
+            )
+            if result.stderr:
+                print(f"Error output: {result.stderr}")
+        else:
+            print("✓ Playwright browsers verified/installed successfully")
+    except subprocess.TimeoutExpired:
+        print("Warning: Playwright browser installation timed out (5 minutes)")
+    except Exception as e:
+        print(f"Warning: Failed to ensure Playwright browsers: {e}")
+
+
 app = Flask(__name__)
 CORS(app)
 
 # Production flag - set to True when running in production
 PRODUCTION = os.getenv("ENVIRONMENT", "development") == "production"
+
+# Ensure Playwright browsers are installed at app startup
+ensure_playwright_browsers()
 
 
 @app.route("/login")
@@ -54,6 +82,7 @@ def receive_callback():
     token = token_result["token"]
 
     from db.db_actions import add_user
+
     add_user(email="", password="", ucl_api_token=token, session=None)
     # Generate and return a UUID for the created user
     if user:
