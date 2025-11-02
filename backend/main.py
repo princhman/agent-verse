@@ -121,7 +121,7 @@ async def _capture_cookies_async():
     """Async function to capture cookies from Moodle login"""
     async with async_playwright() as p:
         # Use headless mode in production, interactive in development
-        browser = await p.chromium.launch(headless=PRODUCTION or True)
+        browser = await p.chromium.launch(headless=False)
         context = await browser.new_context()
         page = await context.new_page()
 
@@ -142,4 +142,4 @@ async def _capture_cookies_async():
 if __name__ == "__main__":
     # In production, use gunicorn (via Procfile)
     # In development, use Flask's built-in server
-    app.run(debug=not PRODUCTION, host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+    app.run(debug=not PRODUCTION, host="0.0.0.0", port=int(os.getenv("PORT", 3001)))
