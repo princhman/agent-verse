@@ -15,7 +15,12 @@ import {
 export const user = pgTable('User', {
 	id: uuid('id').primaryKey().notNull().defaultRandom().primaryKey(),
 	email: varchar('email', { length: 64 }).notNull().unique(),
-	password: varchar('password', { length: 64 }).notNull()
+	password: varchar('password', { length: 64 }).notNull(),
+	ucl_api_token: varchar('ucl_api_token', { length: 256 }),
+	last_moodle_sync: timestamp('last_moodle_sync', {
+		withTimezone: true,
+		mode: 'date'
+	})
 });
 
 export type AuthUser = InferSelectModel<typeof user>;

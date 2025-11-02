@@ -8,6 +8,13 @@
       "when": 1762069716327,
       "tag": "0000_heavy_elektra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762072186289,
+      "tag": "0001_worried_the_stranger",
+      "breakpoints": true
     }
   ]
 }

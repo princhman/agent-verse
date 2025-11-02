@@ -15,7 +15,7 @@
 	import SidebarUserNav from './sidebar-user-nav.svelte';
 	import { SidebarHistory } from './sidebar-history';
 
-	let { user }: { user?: User } = $props();
+	let { user }: { user: User } = $props();
 
 	const context = useSidebar();
 </script>
@@ -61,8 +61,6 @@
 		<SidebarHistory {user} />
 	</SidebarContent>
 	<SidebarFooter>
-		{#if user}
-			<SidebarUserNav {user} />
-		{/if}
+		<SidebarUserNav {user} />
 	</SidebarFooter>
 </Sidebar>

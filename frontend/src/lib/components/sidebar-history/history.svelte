@@ -19,7 +19,7 @@
 	import { goto } from '$app/navigation';
 	import { Skeleton } from '../ui/skeleton';
 
-	let { user }: { user?: User } = $props();
+	let { user }: { user: User } = $props();
 	const chatHistory = ChatHistory.fromContext();
 	let alertDialogOpen = $state(false);
 	const groupedChats = $derived(groupChatsByDate(chatHistory.chats));
@@ -105,17 +105,7 @@
 	}
 </script>
 
-{#if !user}
-	<SidebarGroup>
-		<SidebarGroupContent>
-			<div
-				class="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500"
-			>
-				Login to save and revisit previous chats!
-			</div>
-		</SidebarGroupContent>
-	</SidebarGroup>
-{:else if chatHistory.loading}
+{#if chatHistory.loading}
 	<SidebarGroup>
 		<div class="text-sidebar-foreground/50 px-2 py-1 text-xs">Today</div>
 		<SidebarGroupContent>

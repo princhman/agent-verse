@@ -427,3 +427,19 @@ export function updateChatVisiblityById({
 		return ok(undefined);
 	});
 }
+
+export function getDefaultUser(): ResultAsync<User, DbError> {
+	return safeTry(async function* () {
+		const userResult = yield* fromPromise(
+			db.select().from(user).limit(1),
+			(e) => new DbInternalError({ cause: e })
+		);
+
+		if (!userResult || userResult.length === 0) {
+			return new DbInternalError({ cause: new Error('No default user found') });
+		}
+
+		const { password: _, ...rest } = userResult[0];
+		return ok(rest);
+	});
+}

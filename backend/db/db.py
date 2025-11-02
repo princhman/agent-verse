@@ -1,6 +1,9 @@
 import os
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import sessionmaker, Session
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Import Base after other imports to avoid circular imports
 from db.models import Base

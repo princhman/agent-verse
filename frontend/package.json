@@ -18,7 +18,8 @@
 		"db:push": "drizzle-kit push",
 		"db:pull": "drizzle-kit pull",
 		"db:check": "drizzle-kit check",
-		"db:up": "drizzle-kit up"
+		"db:up": "drizzle-kit up",
+		"db:seed": "npx --yes tsx src/lib/server/db/seed.ts"
 	},
 	"devDependencies": {
 		"@ai-sdk/groq": "^1.2.0",

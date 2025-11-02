@@ -23,51 +23,53 @@ token = ""
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/login')
+
+@app.route("/login")
 def uclapi_login():
     url = "https://uclapi.com/oauth/authorise/?client_id=2816741881293921.8225769007143823&state=1"
-    webbrowser.open_new(url) 
+    webbrowser.open_new(url)
     return redirect(url)
 
-@app.route('/callback')
+
+@app.route("/callback")
 def receive_callback():
     # receive parameters
-    result = request.args.get('result', '')
-    code = request.args.get('code', '')
-    state = request.args.get('state', '')
+    result = request.args.get("result", "")
+    code = request.args.get("code", "")
+    state = request.args.get("state", "")
     # do something with these parameters
     print(result)
-    print("code: "+ code)
-
+    print("code: " + code)
 
     # e.g. request an auth token from /oauth/tokem
     params: dict = {
-    "code": code,
-    "client_id": client_id,
-    "client_secret": client_secret,
+        "code": code,
+        "client_id": client_id,
+        "client_secret": client_secret,
     }
     response: Response = requests.get("https://uclapi.com/oauth/token", params=params)
     token_result: dict = response.json()
     global token
     token = token_result["token"]
     print("token: " + token)
-    return redirect('/timetable_results')
+    return redirect("/timetable_results")
 
-@app.route('/room_results')
+
+@app.route("/room_results")
 def room_results():
-
     data = get_free_rooms(start_time, end_time, token)
     print(data)
     return data
 
-@app.route('/timetable_results')
-def timetable_results():
 
+@app.route("/timetable_results")
+def timetable_results():
     data = get_personal_timetable(token)
     print(data)
     return data
 
-@app.route("/scrape", methods=["POST"])
+
+@app.route("/scrape", methods=["GET"])
 def capture_moodle_cookies():
     """Open browser for user to login to UCL Moodle and capture cookies"""
     try:
