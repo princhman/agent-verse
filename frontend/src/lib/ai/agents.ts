@@ -1,6 +1,5 @@
 import { Experimental_Agent as Agent, stepCountIs, tool } from 'ai';
 import { z } from 'zod';
-import { myProvider } from '$lib/server/ai/models';
 
 async function getUCLToken(userId: string): Promise<string> {
 	try {
@@ -33,7 +32,7 @@ function getUserId(): string {
 }
 
 export const uclapiAgent = new Agent({
-	model: myProvider.languageModel('chat-model'),
+	model: undefined as any, // Will be set dynamically from server
 	tools: {
 		getTimetable: tool({
 			description: 'Get the personal timetable for a specific date',
