@@ -1,4 +1,4 @@
 import { sequence } from '@sveltejs/kit/hooks';
-import { handle as authHandle } from '$lib/server/auth/handle';
+import { handle as authHandle } from '$lib/server/auth';
 
 export const handle = sequence(authHandle);

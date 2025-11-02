@@ -11,6 +11,7 @@ import requests
 from requests import Response
 import os
 from dotenv import load_dotenv
+import uuid
 
 load_dotenv()
 
@@ -69,26 +70,39 @@ def timetable_results():
     return data
 
 
-@app.route("/scrape", methods=["GET"])
+@app.route("/scrape", methods=["POST"])
 def capture_moodle_cookies():
     """Open browser for user to login to UCL Moodle and capture cookies"""
     try:
+        # Get user_id from request JSON body
+        data = request.get_json()
+        user_id_str = data.get("user_id") if data else None
+
+        if not user_id_str:
+            return jsonify({"status": "error", "error": "user_id is required"}), 400
+
+        # Validate and convert user_id to UUID
+        try:
+            user_id = uuid.UUID(user_id_str)
+        except (ValueError, TypeError):
+            return jsonify(
+                {"status": "error", "error": "user_id must be a valid UUID"}
+            ), 400
+
         # Run the async function in an event loop
         cookies = asyncio.run(_capture_cookies_async())
 
         # Run the scraping in the same event loop
-        asyncio.run(scrape(cookies))
+        asyncio.run(scrape(cookies, user_id))
 
         return jsonify(
             {
-                "success": True,
-                "message": "Cookies captured successfully and scraped",
-                "cookies_count": len(cookies),
+                "status": "success",
             }
         )
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"status": "error", "error": str(e)}), 500
 
 
 async def _capture_cookies_async():

@@ -1,0 +1,4 @@
+- Connect Google Model
+- Create agent
+- Connect Backend and store state somewhere
+- Get the tools

@@ -1,31 +1,76 @@
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+import uuid
 
 from db.db import get_session
-from db.models import Course, Section, File
+from db.models import Course, Section, File, User
+
+
+def add_user(
+    email: str,
+    password: str,
+    ucl_api_token: str | None = None,
+    session: Session | None = None,
+) -> User | None:
+    """
+    Add a new user to the database.
+
+    Args:
+        email: User email address
+        password: User password
+        ucl_api_token: Optional UCL API token
+        session: Optional database session. If not provided, creates a new one.
+
+    Returns:
+        The created User object, or None if creation failed
+    """
+    if session is None:
+        session = get_session()
+        close_session = True
+    else:
+        close_session = False
+
+    try:
+        user = User(
+            id=uuid.uuid4(),
+            email=email,
+            password=password,
+            ucl_api_token=ucl_api_token,
+        )
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user
+    except IntegrityError as e:
+        session.rollback()
+        print(f"Error adding user: {e}")
+        return None
+    finally:
+        if close_session:
+            session.close()
 
 
 def add_course(
-    user_id: str,
-    course_id: str,
-    course_name: str,
+    userId: uuid.UUID,
+    courseId: str,
+    courseName: str,
     session: Session | None = None,
 ) -> Course | None:
     """
     Add a new course to the database.
 
     Args:
-        user_id: The ID of the user who owns this course
-        course_id: Unique identifier for the course
-        course_name: Name of the course
+        userId: ID of the user who owns this course
+        courseId: Unique identifier for the course
+        courseName: Name of the course
         session: Optional database session. If not provided, creates a new one.
 
     Returns:
         The created Course object, or None if creation failed
 
     Raises:
-        IntegrityError: If course_id already exists (unique constraint violation)
+        IntegrityError: If courseId already exists (unique constraint violation)
     """
     if session is None:
         session = get_session()
@@ -35,9 +80,9 @@ def add_course(
 
     try:
         course = Course(
-            user_id=user_id,
-            course_id=course_id,
-            course_name=course_name,
+            userId=userId,
+            courseId=courseId,
+            courseName=courseName,
         )
         session.add(course)
         session.commit()
@@ -53,8 +98,8 @@ def add_course(
 
 
 def add_section(
-    section_id: str,
-    course_id: str,
+    sectionId: str,
+    courseId: str,
     title: str | None = None,
     content: str | None = None,
     session: Session | None = None,
@@ -63,8 +108,8 @@ def add_section(
     Add a new section to the database.
 
     Args:
-        section_id: Unique identifier for the section
-        course_id: ID of the parent course
+        sectionId: Unique identifier for the section
+        courseId: ID of the parent course
         title: Optional title of the section
         content: Optional content of the section
         session: Optional database session. If not provided, creates a new one.
@@ -73,7 +118,7 @@ def add_section(
         The created Section object, or None if creation failed
 
     Raises:
-        IntegrityError: If section_id already exists or if course_id doesn't exist
+        IntegrityError: If sectionId already exists or if courseId doesn't exist
     """
     if session is None:
         session = get_session()
@@ -83,11 +128,11 @@ def add_section(
 
     try:
         section = Section(
-            section_id=section_id,
-            course_id=course_id,
+            sectionId=sectionId,
+            courseId=courseId,
             title=title,
             content=content,
-            created_at=datetime.now(timezone.utc),
+            createdAt=datetime.now(timezone.utc),
         )
         session.add(section)
         session.commit()
@@ -105,8 +150,8 @@ def add_section(
 def add_file(
     path: str,
     key: str,
-    course_id: str,
-    section_id: str | None = None,
+    courseId: str,
+    sectionId: str | None = None,
     session: Session | None = None,
 ) -> File | None:
     """
@@ -115,15 +160,15 @@ def add_file(
     Args:
         path: File path (primary key)
         key: Unique key for the file
-        course_id: ID of the parent course
-        section_id: Optional ID of the parent section
+        courseId: ID of the parent course
+        sectionId: Optional ID of the parent section
         session: Optional database session. If not provided, creates a new one.
 
     Returns:
         The created File object, or None if creation failed
 
     Raises:
-        IntegrityError: If path or key already exists, or if course_id/section_id don't exist
+        IntegrityError: If path or key already exists, or if courseId/sectionId don't exist
     """
     if session is None:
         session = get_session()
@@ -135,9 +180,9 @@ def add_file(
         file = File(
             path=path,
             key=key,
-            course_id=course_id,
-            section_id=section_id,
-            created_at=datetime.now(timezone.utc),
+            courseId=courseId,
+            sectionId=sectionId,
+            createdAt=datetime.now(timezone.utc),
         )
         session.add(file)
         session.commit()
@@ -153,20 +198,20 @@ def add_file(
 
 
 def add_course_with_sections(
-    user_id: str,
-    course_id: str,
-    course_name: str,
+    userId: uuid.UUID,
+    courseId: str,
+    courseName: str,
     sections_data: list[dict] | None = None,
 ) -> Course | None:
     """
     Add a new course along with multiple sections in a single transaction.
 
     Args:
-        user_id: The ID of the user who owns this course
-        course_id: Unique identifier for the course
-        course_name: Name of the course
+        userId: ID of the user who owns this course
+        courseId: Unique identifier for the course
+        courseName: Name of the course
         sections_data: Optional list of section dictionaries with keys:
-                      'section_id', 'title' (optional), 'content' (optional)
+                      'sectionId', 'title' (optional), 'content' (optional)
 
     Returns:
         The created Course object with all sections, or None if creation failed
@@ -175,20 +220,20 @@ def add_course_with_sections(
 
     try:
         course = Course(
-            user_id=user_id,
-            course_id=course_id,
-            course_name=course_name,
+            userId=userId,
+            courseId=courseId,
+            courseName=courseName,
         )
         session.add(course)
 
         if sections_data:
             for section_data in sections_data:
                 section = Section(
-                    section_id=section_data.get("section_id"),
-                    course_id=course_id,
+                    sectionId=section_data.get("sectionId"),
+                    courseId=courseId,
                     title=section_data.get("title"),
                     content=section_data.get("content"),
-                    created_at=datetime.now(timezone.utc),
+                    createdAt=datetime.now(timezone.utc),
                 )
                 session.add(section)
 
@@ -204,8 +249,8 @@ def add_course_with_sections(
 
 
 def add_section_with_files(
-    section_id: str,
-    course_id: str,
+    sectionId: str,
+    courseId: str,
     title: str | None = None,
     content: str | None = None,
     files_data: list[dict] | None = None,
@@ -214,8 +259,8 @@ def add_section_with_files(
     Add a new section along with multiple files in a single transaction.
 
     Args:
-        section_id: Unique identifier for the section
-        course_id: ID of the parent course
+        sectionId: Unique identifier for the section
+        courseId: ID of the parent course
         title: Optional title of the section
         content: Optional content of the section
         files_data: Optional list of file dictionaries with keys:
@@ -228,11 +273,11 @@ def add_section_with_files(
 
     try:
         section = Section(
-            section_id=section_id,
-            course_id=course_id,
+            sectionId=sectionId,
+            courseId=courseId,
             title=title,
             content=content,
-            created_at=datetime.now(timezone.utc),
+            createdAt=datetime.now(timezone.utc),
         )
         session.add(section)
 
@@ -241,9 +286,9 @@ def add_section_with_files(
                 file = File(
                     path=file_data.get("path"),
                     key=file_data.get("key"),
-                    course_id=course_id,
-                    section_id=section_id,
-                    created_at=datetime.now(timezone.utc),
+                    courseId=courseId,
+                    sectionId=sectionId,
+                    createdAt=datetime.now(timezone.utc),
                 )
                 session.add(file)
 
@@ -259,9 +304,9 @@ def add_section_with_files(
 
 
 def add_or_update_course_with_sections(
-    user_id: str,
-    course_id: str,
-    course_name: str,
+    userId: uuid.UUID,
+    courseId: str,
+    courseName: str,
     sections_data: list[dict] | None = None,
 ) -> Course | None:
     """
@@ -269,11 +314,11 @@ def add_or_update_course_with_sections(
     If course exists, it deletes old sections and replaces them with new ones.
 
     Args:
-        user_id: The ID of the user who owns this course
-        course_id: Unique identifier for the course
-        course_name: Name of the course
+        userId: ID of the user who owns this course
+        courseId: Unique identifier for the course
+        courseName: Name of the course
         sections_data: Optional list of section dictionaries with keys:
-                      'section_id', 'title' (optional), 'content' (optional)
+                      'sectionId', 'title' (optional), 'content' (optional)
 
     Returns:
         The created or updated Course object with all sections, or None if operation failed
@@ -283,38 +328,38 @@ def add_or_update_course_with_sections(
     try:
         # Check if course already exists
         existing_course = (
-            session.query(Course).filter(Course.course_id == course_id).first()
+            session.query(Course).filter(Course.courseId == courseId).first()
         )
 
         if existing_course:
             # Update existing course
-            existing_course.course_name = course_name
-            existing_course.user_id = user_id
+            existing_course.courseName = courseName
+            existing_course.userId = userId
 
             # Delete old sections (cascade will delete associated files)
-            session.query(Section).filter(Section.course_id == course_id).delete()
+            session.query(Section).filter(Section.courseId == courseId).delete()
 
             course = existing_course
-            print(f"✓ Updating existing course: {course_id}")
+            print(f"✓ Updating existing course: {courseId}")
         else:
             # Create new course
             course = Course(
-                user_id=user_id,
-                course_id=course_id,
-                course_name=course_name,
+                userId=userId,
+                courseId=courseId,
+                courseName=courseName,
             )
             session.add(course)
-            print(f"✓ Creating new course: {course_id}")
+            print(f"✓ Creating new course: {courseId}")
 
         # Add sections
         if sections_data:
             for section_data in sections_data:
                 section = Section(
-                    section_id=section_data.get("section_id"),
-                    course_id=course_id,
+                    sectionId=section_data.get("sectionId"),
+                    courseId=courseId,
                     title=section_data.get("title"),
                     content=section_data.get("content"),
-                    created_at=datetime.now(timezone.utc),
+                    createdAt=datetime.now(timezone.utc),
                 )
                 session.add(section)
 

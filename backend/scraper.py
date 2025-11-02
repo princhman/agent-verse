@@ -4,6 +4,7 @@ from typing import Any
 import os
 import aiohttp
 import hashlib
+import uuid
 
 from db.db_actions import add_or_update_course_with_sections, add_file
 from db.db import get_session
@@ -170,13 +171,13 @@ def _save_course_to_database(
             # Build markdown content from modules
             markdown_content = _build_section_markdown_content(modules)
 
-            # Create unique section_id using section name hash to avoid duplicates
+            # Create unique sectionId using section name hash to avoid duplicates
             section_name_hash = hashlib.md5(section_name.encode()).hexdigest()[:8]
             section_id = f"{course_id}_section_{section_name_hash}"
 
             db_sections.append(
                 {
-                    "section_id": section_id,
+                    "sectionId": section_id,
                     "title": section_name,
                     "content": markdown_content,
                 }
@@ -184,9 +185,9 @@ def _save_course_to_database(
 
         # Add or update course with sections to database
         course = add_or_update_course_with_sections(
-            user_id=user_id,
-            course_id=course_id,
-            course_name=course_name,
+            userId=user_id,
+            courseId=course_id,
+            courseName=course_name,
             sections_data=db_sections,
         )
 
@@ -198,7 +199,7 @@ def _save_course_to_database(
             # Save files for each section and upload to S3
             for idx, section in enumerate(sections_data):
                 section_name = section.get("name", "unnamed_section")
-                # Recreate the same section_id using the hash to match what was saved
+                # Recreate the same sectionId using the hash to match what was saved
                 section_name_hash = hashlib.md5(section_name.encode()).hexdigest()[:8]
                 section_id = f"{course_id}_section_{section_name_hash}"
 
@@ -243,8 +244,8 @@ def _save_course_to_database(
                         add_file(
                             path=file_path,
                             key=file_key,
-                            course_id=course_id,
-                            section_id=section_id,
+                            courseId=course_id,
+                            sectionId=section_id,
                             session=session,
                         )
 
@@ -259,7 +260,7 @@ def _save_course_to_database(
 
 
 async def scrape_course_details(
-    course_url: str, page: Page, user_id: str = "default_user"
+    course_url: str, page: Page, user_id: uuid.UUID | str = "default_user"
 ) -> dict[str, Any]:
     """Scrape details from a single course page and save to database."""
     try:
@@ -412,7 +413,9 @@ async def scrape_course_details(
     return course_data
 
 
-async def scrape(cookies: list[dict[str, Any]]) -> None:
+async def scrape(
+    cookies: list[dict[str, Any]], user_id: uuid.UUID | str = "default_user"
+) -> None:
     """Main function to orchestrate the scraping process."""
     async with async_playwright() as p:
         browser: Browser = await p.chromium.launch()
@@ -426,7 +429,6 @@ async def scrape(cookies: list[dict[str, Any]]) -> None:
 
         try:
             course_urls: list[str] = await fetch_all_available_courses(page)
-            user_id: str = "moodle_user_001"
 
             detailed_courses: list[dict[str, Any]] = []
             for idx, url in enumerate(course_urls[:2], 1):
