@@ -81,6 +81,26 @@ def receive_callback():
     token = token_result["token"]
     return jsonify({"token": token})
 
+# backend/main.py
+@app.route("/api/free-rooms", methods=["POST"])
+def free_rooms_endpoint():
+    data = request.get_json()
+    result = get_free_rooms(
+        start_datetime=data['start_datetime'],
+        end_datetime=data['end_datetime'],
+        token=data['ucl_api_token']  # Get from session/auth
+    )
+    return jsonify(result)
+
+@app.route("/api/timetable", methods=["POST"])
+def timetable_endpoint():
+    data = request.get_json()
+    result = get_personal_timetable(
+        token=data['ucl_api_token']
+        date=data.get('date', '')
+    )
+    return jsonify(result)
+
 
 @app.route("/scrape", methods=["POST"])
 def capture_moodle_cookies():
