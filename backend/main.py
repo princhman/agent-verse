@@ -24,6 +24,9 @@ token = ""
 app = Flask(__name__)
 CORS(app)
 
+# Production flag - set to True when running in production
+PRODUCTION = os.getenv("ENVIRONMENT", "development") == "production"
+
 
 @app.route("/login")
 def uclapi_login():
@@ -108,7 +111,8 @@ def capture_moodle_cookies():
 async def _capture_cookies_async():
     """Async function to capture cookies from Moodle login"""
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        # Use headless mode in production, interactive in development
+        browser = await p.chromium.launch(headless=PRODUCTION or True)
         context = await browser.new_context()
         page = await context.new_page()
 
@@ -127,4 +131,6 @@ async def _capture_cookies_async():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # In production, use gunicorn (via Procfile)
+    # In development, use Flask's built-in server
+    app.run(debug=not PRODUCTION, host="0.0.0.0", port=int(os.getenv("PORT", 5000)))

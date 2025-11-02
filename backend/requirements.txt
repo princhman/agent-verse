@@ -1,3 +1,13 @@
 flask
+flask-cors
 requests
 python-dotenv
+gunicorn
+playwright
+pydantic
+beautifulsoup4
+sqlalchemy
+psycopg2-binary
+cryptography
+boto3
+aiohttp
