@@ -32,10 +32,6 @@ def get_free_rooms(start_datetime, end_datetime, token):
         data: dict = response.json()
     
         return data
-
-    # Print the current weather, formatted using Python f-strings
-    #print(f"Current temperature: {weather['temperature']}°C")
-    #print(f"Current windspeed: {weather['windspeed']} km/h")
     
     else:
         error_message: dict = response.json()
@@ -44,7 +40,6 @@ def get_free_rooms(start_datetime, end_datetime, token):
 
 def main():
     TOKEN = os.getenv("TOKEN")
-   # TOKEN ="uclapi-user-b162da3fa3c333d-dbbde83ab9754fb-00000a12fc3b7a5-bcd7517e9279e26"
     start_time = "2025-11-07T00:00:00Z"
     end_time = "2025-11-09T00:00:00Z"
     data = get_free_rooms(start_time, end_time, TOKEN)
