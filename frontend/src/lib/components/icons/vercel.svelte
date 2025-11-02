@@ -1,6 +1,6 @@
 <script lang="ts">
 	let {
-		size = 32
+		size = 80
 	} = $props();
 </script>
 
