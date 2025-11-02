@@ -12,28 +12,16 @@
 			<MessageIcon size={32} />
 		</p>
 		<p>
-			This is an
-			<a
-				class="font-medium underline underline-offset-4"
-				href="https://github.com/vercel/ai-chatbot-svelte"
-				target="_blank"
-			>
-				open source
-			</a>
-			chatbot template built with SvelteKit and the AI SDK by Vercel. It uses the
-			<code class="bg-muted rounded-md px-1 py-0.5">streamText</code>
-			function in the server and the
-			<code class="bg-muted rounded-md px-1 py-0.5">useChat</code> hook on the client to create a seamless
-			chat experience.
+			Hello there, how can I help you today?
 		</p>
 		<p>
-			You can learn more about the AI SDK by visiting the
+			You can learn more about this project by visiting
 			<a
 				class="font-medium underline underline-offset-4"
-				href="https://sdk.vercel.ai/docs"
+				href="https://github.com/princhman/agent-verse"
 				target="_blank"
 			>
-				docs
+				our website
 			</a>
 			.
 		</p>
