@@ -431,7 +431,7 @@ async def scrape(
             course_urls: list[str] = await fetch_all_available_courses(page)
 
             detailed_courses: list[dict[str, Any]] = []
-            for idx, url in enumerate(course_urls[:2], 1):
+            for idx, url in enumerate(course_urls, 1):
                 try:
                     print(
                         f"\n  Scraping course {idx}/{min(2, len(course_urls))}: {url}"
