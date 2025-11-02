@@ -6,6 +6,12 @@ CREATE TABLE "Chat" (
 	"visibility" varchar DEFAULT 'private' NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "Course" (
+	"userId" varchar(255) NOT NULL,
+	"courseId" varchar(255) PRIMARY KEY NOT NULL,
+	"courseName" varchar(255) NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "Document" (
 	"id" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"createdAt" timestamp NOT NULL,
@@ -15,6 +21,15 @@ CREATE TABLE "Document" (
 	"userId" uuid NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "File" (
+	"path" varchar(500) PRIMARY KEY NOT NULL,
+	"key" varchar(255) NOT NULL,
+	"sectionId" varchar(255),
+	"courseId" varchar(255) NOT NULL,
+	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "File_key_unique" UNIQUE("key")
+);
+--> statement-breakpoint
 CREATE TABLE "Message" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"chatId" uuid NOT NULL,
@@ -22,6 +37,14 @@ CREATE TABLE "Message" (
 	"parts" json NOT NULL,
 	"attachments" json NOT NULL,
 	"createdAt" timestamp NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "Section" (
+	"sectionId" varchar(255) PRIMARY KEY NOT NULL,
+	"courseId" varchar(255) NOT NULL,
+	"content" text,
+	"title" varchar(255),
+	"createdAt" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "Session" (
@@ -57,7 +80,10 @@ CREATE TABLE "Vote" (
 --> statement-breakpoint
 ALTER TABLE "Chat" ADD CONSTRAINT "Chat_userId_User_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "Document" ADD CONSTRAINT "Document_userId_User_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "File" ADD CONSTRAINT "File_sectionId_Section_sectionId_fk" FOREIGN KEY ("sectionId") REFERENCES "public"."Section"("sectionId") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "File" ADD CONSTRAINT "File_courseId_Course_courseId_fk" FOREIGN KEY ("courseId") REFERENCES "public"."Course"("courseId") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "Message" ADD CONSTRAINT "Message_chatId_Chat_id_fk" FOREIGN KEY ("chatId") REFERENCES "public"."Chat"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "Section" ADD CONSTRAINT "Section_courseId_Course_courseId_fk" FOREIGN KEY ("courseId") REFERENCES "public"."Course"("courseId") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_User_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "Suggestion" ADD CONSTRAINT "Suggestion_userId_User_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "Vote" ADD CONSTRAINT "Vote_chatId_Chat_id_fk" FOREIGN KEY ("chatId") REFERENCES "public"."Chat"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

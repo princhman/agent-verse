@@ -5,12 +5,9 @@ from sqlalchemy.orm import sessionmaker, Session
 # Import Base after other imports to avoid circular imports
 from db.models import Base
 
-# MySQL database configuration
-# Format: mysql+pymysql://username:password@host:port/database
-SQLALCHEMY_DATABASE_URL: str = os.getenv(
-    "DATABASE_URL1",
-    "mysql+pymysql://root:gETqialEBCFOlToYplmRtWsOlAAncztx@yamabiko.proxy.rlwy.net:59134/railway",
-)
+# PostgreSQL database configuration
+# Format: postgresql://username:password@host:port/database
+SQLALCHEMY_DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
 # Create engine with connection pooling
 engine: Engine = create_engine(

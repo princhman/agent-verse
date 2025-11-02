@@ -8,7 +8,8 @@ import {
 	text,
 	primaryKey,
 	foreignKey,
-	boolean
+	boolean,
+	uniqueIndex
 } from 'drizzle-orm/pg-core';
 
 export const user = pgTable('User', {
@@ -130,3 +131,80 @@ export const suggestion = pgTable(
 );
 
 export type Suggestion = InferSelectModel<typeof suggestion>;
+
+// Course, Section, and File tables
+export const course = pgTable(
+	'Course',
+	{
+		userId: varchar('userId', { length: 255 }).notNull(),
+		courseId: varchar('courseId', { length: 255 }).primaryKey().notNull(),
+		courseName: varchar('courseName', { length: 255 }).notNull()
+	},
+	(table) => [
+		{
+			uniqueCourseId: uniqueIndex('uq_course_id').on(table.courseId)
+		}
+	]
+);
+
+export type Course = InferSelectModel<typeof course>;
+
+export const section = pgTable(
+	'Section',
+	{
+		sectionId: varchar('sectionId', { length: 255 }).primaryKey().notNull(),
+		courseId: varchar('courseId', { length: 255 })
+			.notNull()
+			.references(() => course.courseId),
+		content: text('content'),
+		title: varchar('title', { length: 255 }),
+		createdAt: timestamp('createdAt', {
+			withTimezone: true,
+			mode: 'date'
+		})
+			.notNull()
+			.defaultNow()
+	},
+	(table) => [
+		{
+			courseIdIdx: foreignKey({
+				columns: [table.courseId],
+				foreignColumns: [course.courseId]
+			})
+		}
+	]
+);
+
+export type Section = InferSelectModel<typeof section>;
+
+export const file = pgTable(
+	'File',
+	{
+		path: varchar('path', { length: 500 }).primaryKey().notNull(),
+		key: varchar('key', { length: 255 }).notNull().unique(),
+		sectionId: varchar('sectionId', { length: 255 }).references(() => section.sectionId),
+		courseId: varchar('courseId', { length: 255 })
+			.notNull()
+			.references(() => course.courseId),
+		createdAt: timestamp('createdAt', {
+			withTimezone: true,
+			mode: 'date'
+		})
+			.notNull()
+			.defaultNow()
+	},
+	(table) => [
+		{
+			courseIdIdx: foreignKey({
+				columns: [table.courseId],
+				foreignColumns: [course.courseId]
+			}),
+			sectionIdIdx: foreignKey({
+				columns: [table.sectionId],
+				foreignColumns: [section.sectionId]
+			})
+		}
+	]
+);
+
+export type File = InferSelectModel<typeof file>;
