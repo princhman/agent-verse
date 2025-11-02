@@ -32,10 +32,6 @@ def get_free_rooms(start_datetime, end_datetime, token):
         data: dict = response.json()
     
         return data
-
-    # Print the current weather, formatted using Python f-strings
-    #print(f"Current temperature: {weather['temperature']}°C")
-    #print(f"Current windspeed: {weather['windspeed']} km/h")
     
     else:
         error_message: dict = response.json()
